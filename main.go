@@ -30,11 +30,6 @@ func ShowUsage() {
 func GetSecretDataHex(secretId string, secretLines []string) string {
 	fmt.Println("Getting secret for id: ", secretId);
 
-	// secrets := map[string]string {
-	// 	"SECRET": "f2925690aeb411443bb2fe3756118b2acf6c00c96c6bccc26cc5738edd96935414f4fd302ce8a4e8768e226787d7eeffda4daf20",
-    // 	"PASS":   "a49f58c6dce0536e54f4cf5d064932dfe5702d2f280f7b292861206aae75f70b76a51ceb9982e63e5950",
-	// }
-
 	secretValue := ""
 
 	for i, line := range secretLines {
@@ -50,14 +45,6 @@ func GetSecretDataHex(secretId string, secretLines []string) string {
 	fmt.Println("No Secrets found ")
 	return ""
 
-	// secretValue := secrets[secretId];
-	// if secretValue == "" || secretValue == "null" {
-    //     fmt.Println("ERROR::Secret for key: ", secretId, " was not found!!")
-	// 	return "";
-    // } else {
-	// 	return secretValue;
-	// }
-	// return "f2925690aeb411443bb2fe3756118b2acf6c00c96c6bccc26cc5738edd96935414f4fd302ce8a4e8768e226787d7eeffda4daf20";
 } 
 
 // saveListToFile function saves a list of strings to a specified file
@@ -270,21 +257,6 @@ func main() {
 				secretsMap[secretId] = secretLine
 			}
 
-			// //debug
-			// linesDebug, errDebug := ReadSecretsDataFileLines(secretsFilePath)
-			// if errDebug != nil {
-			// 	fmt.Println("Error reading file:", errDebug)
-			// 	return
-			// }
-			// for i, line := range linesDebug {
-			// 	fmt.Printf("DEBUG Line %d: %s\n", i+1, line)
-			// }
-
-			// //debug 
-			// for i, line := range secretLines {
-			// 	fmt.Printf("Line %d: %s\n", i+1, line)
-			// }
-
 		} else {
 			lines = []string{}
 			secretLines = []string{}
@@ -320,8 +292,6 @@ func main() {
 			newBase64Lines := []string{}
 
 			newSecretValue := os.Args[5]
-			// base64secret := encodeToBase64(secretId + ":" + newSecretValue)
-			//secretId + ":" + newSecretValue
 			
 			encodedSecretValue := Encode(encryptionKey, newSecretValue)
 			secretLine := secretId + ":" + encodedSecretValue
@@ -332,21 +302,14 @@ func main() {
 			for _, value := range secretsMap {
 				newSecretLines = append(newSecretLines, value)
 			}
-			// secretLines = append(secretLines, secretLine)
 
 			for i, line := range newSecretLines {
 				fmt.Printf("SecretLine %d: %s\n", i+1, line)
 				base64Line := encodeToBase64(line)
-				// if err != nil {
-				// 	fmt.Println("Error decoding base64 line:", err)
-				// 	return
-				// }
 				newBase64Lines = append(newBase64Lines, base64Line)
-				
 			}
 
 			SaveListToFile(secretsFilePath, newBase64Lines)
-
 
 		}
 		
@@ -354,9 +317,5 @@ func main() {
 	} else {
 		ShowUsage();
 	}
-
-    // text := []byte("My Super Secret Code Stuff")
-    // key := []byte("passphrasewhichneedstobe32bytes!")
-
     
 }
