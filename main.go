@@ -14,9 +14,13 @@ import (
 	"github.com/atotto/clipboard"
 )
 
+
+var debugEnabled bool = false;
+var version string = "0.5";
+
 func ShowUsage() {
 	fmt.Println("\n")
-	fmt.Println("Go secret app - Application encrypts text data. ")
+	fmt.Println("go-secret-app version: " + version + " - Application encrypts text data. ")
 
 	fmt.Println("Usage:")
 	fmt.Println("    go-secret-app-0.2-windows-amd64.exe --add PATH_TO_SECRETS_FILE ENCODING_KEY SECRET_ID SECRET_VALUE")
@@ -27,7 +31,7 @@ func ShowUsage() {
 
 }
 
-var debugEnabled bool = false;
+
 
 func GetSecretDataHex(secretId string, secretLines []string) string {
 	fmt.Println("Getting secret for id: ", secretId);
@@ -222,7 +226,7 @@ func fileExists(filePath string) bool {
 }
 
 func main() {
-    fmt.Println("Go Secret App v0.1")
+    fmt.Println("Go Secret App - Version: " + version)
 
 	argsWithProgramName := os.Args
 	argsWithoutProgramName := os.Args[1:]
