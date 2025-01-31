@@ -27,13 +27,17 @@ func ShowUsage() {
 
 }
 
+var debugEnabled bool = false;
+
 func GetSecretDataHex(secretId string, secretLines []string) string {
 	fmt.Println("Getting secret for id: ", secretId);
 
 	secretValue := ""
 
 	for i, line := range secretLines {
-		fmt.Printf("Line %d: %s\n", i+1, line)
+		if debugEnabled {
+			fmt.Printf("DEBUG::Line %d: %s\n", i+1, line)
+		}
 		if strings.HasPrefix(line, secretId) {
 			// Split the string by the separator
 			parts := strings.Split(line, ":")
@@ -42,7 +46,7 @@ func GetSecretDataHex(secretId string, secretLines []string) string {
 			return secretValue
 		}
 	}
-	fmt.Println("No Secrets found ")
+	fmt.Println("Warning::No Secrets found ")
 	return ""
 
 } 
@@ -94,21 +98,21 @@ func ReadSecretsDataFileLines(filePath string) ([]string, error) {
 func Decode(encryptionKey string, hexString string) string {
 
 	if (len(encryptionKey) != 32) {
-		fmt.Println("    Encryption key must be 32 characters !!!");
+		fmt.Println("\nERROR::Encryption key must be 32 characters !!!");
 		return "";
 	}
 
 	if hexString == "" || hexString == "null" {
-        fmt.Println("ERROR::Secret was not found!!")
+        fmt.Println("\nERROR::Secret was not found!!")
 		return "";
 	}
-
-	fmt.Println("Hex String: ", hexString)
-
+	if debugEnabled {
+		fmt.Println("DEBUG::Hex String: ", hexString)
+	}
 	dataToDecodeByteArray, err := hex.DecodeString(hexString)
 	
 	if err != nil {
-		fmt.Println("Unable to convert hex to byte. ", err)
+		fmt.Println("\nError::Unable to convert hex to byte. ", err)
 	}
 
 	ciphertext := dataToDecodeByteArray;
@@ -136,8 +140,9 @@ func Decode(encryptionKey string, hexString string) string {
     if err != nil {
         fmt.Println(err)
     }
-    fmt.Println(string(plaintext))
-
+    if debugEnabled {
+		fmt.Println("DEBUG::" + string(plaintext))
+	}
 	return string(plaintext)
 
 }
@@ -145,7 +150,7 @@ func Decode(encryptionKey string, hexString string) string {
 
 func Encode(encryptionKey string, stext string) string {
 	if (len(encryptionKey) != 32) {
-		fmt.Println("    Encryption key must be 32 characters !!!");
+		fmt.Println("\nWarning::Encryption key must be 32 characters !!!");
 		return "";
 	}
 
@@ -186,7 +191,10 @@ func Encode(encryptionKey string, stext string) string {
 	encodedByteArray := gcm.Seal(nonce, nonce, text, nil)
     //fmt.Println(encodedByteArray)
 	str := hex.EncodeToString(encodedByteArray)
-	fmt.Println(str)
+	
+	if debugEnabled {
+		fmt.Println("DEBUG::" + str)
+	}
 	return str
 }
 
@@ -238,19 +246,21 @@ func main() {
 
 
 		if fileExists(secretsFilePath) {
-			fmt.Printf("Reading secrets from file %s.\n", secretsFilePath)
+			fmt.Printf("\nReading secrets from file %s.\n", secretsFilePath)
 			lines, err = ReadSecretsDataFileLines(secretsFilePath)
 			secretLines = []string{} //clean secret lines in form: secret_id:hex_secreet_encoded_value 
 			if err != nil {
-				fmt.Println("Error reading file:", err)
+				fmt.Println("\nError reading file:", err)
 				return
 			} 
 
 			for i, line := range lines {
-				fmt.Printf("Line %d: %s\n", i+1, line)
+				if debugEnabled {
+					fmt.Printf("DEBUG::Line %d: %s\n", i+1, line)
+				}
 				secretLine, err := decodeFromBase64(line)
 				if err != nil {
-					fmt.Println("Error decoding base64 line:", err)
+					fmt.Println("\nError decoding base64 line:", err)
 					return
 				}
 				secretLines = append(secretLines, secretLine)
@@ -268,24 +278,31 @@ func main() {
 
 			secretDataHEX := GetSecretDataHex(secretId,secretLines);
 		
-			fmt.Println("Decoding: ", secretId, " with key: ", encryptionKey)
+			fmt.Println("\nDecoding: ", secretId)
+			
+			if debugEnabled {
+				fmt.Println("\nDecoding: ", secretId, " with key: ", encryptionKey)
+			}
+			
 			// encoded := Encode(os.Args[2], os.Args[3])
 			decoded := Decode(encryptionKey, secretDataHEX)
 			if decoded == "" || decoded == "null" {
 				fmt.Println("ERROR::Secret was not found!!")
 			} else {
 				fmt.Println("\n");
-				fmt.Println("Secret: ", secretId, decoded);
-				fmt.Println("\n");
+				if debugEnabled {
+					fmt.Println("DEBUG::Secret: ", secretId, decoded);
+				}
 
 					// Wstaw tekst do schowka
 				err := clipboard.WriteAll(decoded)
 				if err != nil {
-					fmt.Println("Error while inserting secret to the clipboard: ", err)
+					fmt.Println("\nError while inserting secret to the clipboard: ", err)
 					return
 				}
 
-				fmt.Println("The secret was INSERTED TO THE CLIPBOARD: ", decoded)
+				fmt.Println("The secret was inserted to the clipboard")
+				fmt.Println("\n");
 			}
 			
 		} else if operation == "--add" && len(os.Args) == 6 {
@@ -304,12 +321,15 @@ func main() {
 			}
 
 			for i, line := range newSecretLines {
-				fmt.Printf("SecretLine %d: %s\n", i+1, line)
+				if debugEnabled {
+					fmt.Printf("DEBUG::SecretLine %d: %s\n", i+1, line)
+				}
 				base64Line := encodeToBase64(line)
 				newBase64Lines = append(newBase64Lines, base64Line)
 			}
 
 			SaveListToFile(secretsFilePath, newBase64Lines)
+			fmt.Println("\nThe secret was added to the secrets file: " + secretsFilePath)
 
 		}
 		
