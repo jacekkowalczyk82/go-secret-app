@@ -258,13 +258,20 @@ func main() {
 				if debugEnabled {
 					fmt.Printf("DEBUG::Line %d: %s\n", i+1, line)
 				}
-				secretLine, err := decodeFromBase64(line)
+				existingSecretLine, err := decodeFromBase64(line)
 				if err != nil {
 					fmt.Println("\nError decoding base64 line:", err)
 					return
 				}
-				secretLines = append(secretLines, secretLine)
-				secretsMap[secretId] = secretLine
+				secretLines = append(secretLines, existingSecretLine)
+				secretLineParts := strings.Split(existingSecretLine, ":")
+				existingSecretId := secretLineParts[0]
+				// existingSecretValue := secretLineParts[1]
+
+				if debugEnabled {
+					fmt.Printf("DEBUG::Adding secret %s: %s\n", existingSecretId, existingSecretLine)
+				}
+				secretsMap[existingSecretId] = existingSecretLine
 			}
 
 		} else {
